@@ -14,6 +14,7 @@ std::unordered_map<std::string, uint8_t> CommandStruct::opcodeMap = {
         {"DEC", 0x48},
         {"MUL", 0xF6},
         {"DIV", 0xF7},
+        {"ABS", 0xFA},
 
         {"NEG", 0xF8},
         {"AND", 0x21},
@@ -61,6 +62,16 @@ void CommandStruct::reset() {
     addrMode = 0;
     operand1 = 0;
     operand2 = 0;
+}
+
+std::string CommandStruct::GetCommandName(uint8_t opcode) {
+    for (const auto& [key, value] : opcodeMap) {
+        if (value == opcode) {
+            return key;
+        }
+    }
+
+    throw std::runtime_error("Unknown opcode");
 }
 
 

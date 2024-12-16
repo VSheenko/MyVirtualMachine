@@ -16,6 +16,7 @@ struct CommandStruct {
     [[nodiscard]] std::vector<uint8_t> GetBinFormat() const;
     void SetFromBinFormat(std::vector<uint8_t> bin);
     static uint8_t GetOpcode(std::string command);
+    static std::string GetCommandName(uint8_t opcode);
     void reset();
 
 private:

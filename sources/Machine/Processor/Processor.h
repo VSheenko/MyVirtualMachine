@@ -3,41 +3,21 @@
 
 #include <cstdint>
 #include <stack>
+#include <unordered_map>
+#include "../CommandStruct.h"
 
-struct regs {
-    uint32_t PC = 0;
-    uint32_t IR = 0;
-    uint32_t ACC = 0;
-    uint32_t R[8] = {0};
 
-    uint32_t FLAGS = 0;
-
-    void reset();
-};
-
-enum Opcode {
-    MOV = 0x8A,
-    PUSH = 0x50,
-    POP = 0x58,
-    XCHG = 0x86,
-
-    ADD = 0x01,
-    SUB = 0x2B,
-    INC = 0x40,
-    DEC = 0x48,
-    MUL = 0xF6,
-    DIV = 0xF7,
-    NEG = 0xF8,
-
-    AND = 0x21,
-    OR = 0x09,
-    XOR = 0x31,
-    NOT = 0xF9,
-};
 
 class Processor {
 private:
-    std::stack<uint16_t> stack;
+    // Registers
+    uint32_t ACC = 0;
+    uint32_t R[8] = {0};
+    void resetRegs();
+
+    std::stack<uint32_t> stack;
+    std::unordered_map<std::string, uint8_t> opcodeMap;
+
 
     void mov(uint32_t& dst, uint32_t src);
     void push(uint32_t src);
@@ -50,6 +30,12 @@ private:
     void mul(uint32_t& dst, uint32_t src);
     void div(uint32_t& dst, uint32_t src);
     void neg(uint32_t& dst);
+public:
+    Processor();
+    ~Processor() = default;
+
+    void execute(std::vector<uint8_t> code);
+    void execute();
 
 };
 

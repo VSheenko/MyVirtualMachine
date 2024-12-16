@@ -1,17 +1,6 @@
 #include <stdexcept>
 #include "Processor.h"
 
-void regs::reset() {
-    PC = 0;
-    IR = 0;
-    ACC = 0;
-
-    for (uint32_t & i : R) {
-        i = 0;
-    }
-
-    FLAGS = 0;
-}
 
 void Processor::mov(uint32_t& dst, uint32_t src) {
 
@@ -67,3 +56,25 @@ void Processor::div(uint32_t &dst, uint32_t src) {
 void Processor::neg(uint32_t &dst) {
     dst = -dst;
 }
+
+void Processor::resetRegs() {
+    ACC = 0;
+
+    for (uint32_t & i : R) {
+        i = 0;
+    }
+}
+
+Processor::Processor() {
+
+}
+
+void Processor::execute(std::vector<uint8_t> code) {
+    CommandStruct command;
+    command.SetFromBinFormat(code);
+
+}
+
+void Processor::execute() {
+
+};
