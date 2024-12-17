@@ -11,6 +11,7 @@ private:
     std::shared_ptr<Processor> processor;
     std::shared_ptr<Memory> memory;
     static bool isNegativeNumber(uint32_t number);
+    int32_t GetSignedNumber(uint32_t number);
 
 public:
     Machine(uint32_t memorySize);

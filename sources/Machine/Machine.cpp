@@ -35,11 +35,20 @@ void Machine::GetState(std::basic_ostream<char>& stream) {
 
     stream << std::endl << "Processor state:" << std::endl;
     for (const auto&[reg, value] : processorState) {
-        stream << reg << "\t| 0x" << std::hex << value << std::endl;
+        stream << std::left << reg << "\t| hex: 0x" << std::hex << std::setw(8) << value <<
+                " | dec: " << std::dec << GetSignedNumber(value) << std::endl;
     }
 }
 
 bool Machine::isNegativeNumber(uint32_t number) {
     return (number & 0x80000000) != 0;
+}
+
+int32_t Machine::GetSignedNumber(uint32_t number) {
+    if (isNegativeNumber(number)) {
+        return -1 * (int32_t) ((~number + 1) & 0x7FFFFFFF);
+    }
+
+    return number;
 }
 
