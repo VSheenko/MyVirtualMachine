@@ -1,6 +1,7 @@
 #include <fstream>
 #include <iostream>
 #include <regex>
+#include <algorithm>
 #include "AsmInterpreter.h"
 
 
@@ -38,7 +39,10 @@ void AsmInterpreter::ParseCommand(const std::string& command, CommandStruct& com
     std::smatch matches;
     std::regex asmRegex(R"(^\s*([A-Za-z]+)\s*(.*)\s*$)");
     if (std::regex_match(command, matches, asmRegex)) {
-        commandStruct.opcode = CommandStruct::GetOpcode(matches[1]);  // Первая группа - команда
+        std::string cmd = matches[1];
+        std::transform(cmd.begin(), cmd.end(), cmd.begin(), ::toupper);
+
+        commandStruct.opcode = CommandStruct::GetOpcode(cmd);  // Первая группа - команда
         std::string operandsStr = matches[2];  // Вторая группа - операнды
 
         size_t start = 0;
