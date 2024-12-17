@@ -65,7 +65,7 @@ void AsmInterpreter::ParseCommand(const std::string& command, CommandStruct& com
         return;
     } else if (operands.size() == 1) {
         uint8_t mode1 = GetAddrMode(operands[0]);
-        commandStruct.addrMode = 0 | (mode1 << 4);
+        commandStruct.addrMode = 0 | (mode1 << 4) | 0xF;
 
         commandStruct.operand1 = GetOperandValue(operands[0]);
         commandStruct.operand2 = 0;

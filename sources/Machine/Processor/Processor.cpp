@@ -66,39 +66,13 @@ void Processor::mov(uint8_t addrMode, uint32_t op1, uint32_t op2) {
     uint8_t mode1 = addrMode >> 4;
     uint8_t mode2 = addrMode & 0x0F;
 
-    if (mode1 == 0x01) {
-        throw std::runtime_error("Processor::mov-> Invalid addressing mode");
-    }
 
-    uint32_t src_value = 0;
-    if (mode2 == 0x01) {
-        src_value = op2;
-    } else if (mode2 == 0x00) {
-        if (op2 == 0)
-            src_value = ACC;
-        else
-            src_value = R[op2 - 1];
-    } else if (mode2 == 0x02) {
-        src_value = VectorToUint32(memory->read(op2, 4));
-    } else if (mode2 == 0x03) {
-        src_value = VectorToUint32(memory->read(R[op2], 4));
-    }
-
+    uint32_t src_value = GetValueByOperand(mode2, op2);
     std::vector<uint8_t> data = {(uint8_t )((src_value) & 0xFF),
                                  (uint8_t )((src_value >> 8) & 0xFF),
                                  (uint8_t )((src_value >> 16) & 0xFF),
                                  (uint8_t )((src_value >> 24) & 0xFF)};
-    if (mode1 == 0x00) {
-        if (op1 == 0) {
-            ACC = src_value;
-        } else {
-            R[op1 - 1] = src_value;
-        }
-    } else if (mode1 == 0x02) {
-        memory->write(op1, data);
-    } else if (mode1 == 0x03) {
-        memory->write(R[op1], data);
-    }
+    SetValueByOperand(mode1, op1, src_value);
 }
 
 bool Processor::isDualAddressing(uint8_t addrMode) {
@@ -125,12 +99,81 @@ void Processor::xchg(uint8_t addrMode, uint32_t op1, uint32_t op2) {
 
 }
 
-void Processor::execute(std::vector<uint8_t> code) {
-    CommandStruct command;
-    command.SetFromBinFormat(code);
+void Processor::add(uint8_t addrMode, uint32_t op1, uint32_t op2) {
 
 }
 
 void Processor::execute() {
 
-};
+void Processor::GetRegsState(std::vector<std::pair<std::string, uint32_t>> &regs) {
+    regs = {
+            {"ACC", ACC},
+            {"R0", R[0]},
+            {"R1", R[1]},
+            {"R2", R[2]},
+            {"R3", R[3]},
+            {"R4", R[4]},
+            {"R5", R[5]},
+            {"R6", R[6]},
+            {"R7", R[7]}
+    };
+}
+
+uint32_t Processor::GetValueByOperand(uint8_t addrMode, uint32_t operand) {
+    uint32_t value = 0;
+
+    if (addrMode == 0x01) {
+        value = operand;
+    } else if (addrMode == 0x00) {
+        if (operand == 0) {
+            value = ACC;
+        } else {
+            value = R[operand - 1];
+        }
+    } else {
+        uint32_t addr = 0;
+        if (addrMode == 0x02) {
+            addr = operand;
+        } else if (addrMode == 0x03) {
+            if (operand == 0) {
+                addr = ACC;
+            } else {
+                addr = R[operand - 1];
+            }
+        }
+
+        value = VectorToUint32(memory->read(addr, 4));
+    }
+
+    return value;
+}
+
+void Processor::SetValueByOperand(uint8_t mode, uint32_t operand, uint32_t value) {
+    if (mode == 0x01) {
+        throw std::runtime_error("Processor-> Cannot change constant | addrMode: " + std::to_string(mode));
+    }
+
+    if (mode == 0x00) {
+        if (operand == 0) {
+            ACC = value;
+        } else {
+            R[operand - 1] = value;
+        }
+    } else {
+        uint32_t addr = 0;
+        if (mode == 0x02) {
+            addr = operand;
+        } else if (mode == 0x03) {
+            if (operand == 0) {
+                addr = ACC;
+            } else {
+                addr = R[operand - 1];
+            }
+        }
+
+        memory->write(addr, {(uint8_t )((value) & 0xFF),
+                             (uint8_t )((value >> 8) & 0xFF),
+                             (uint8_t )((value >> 16) & 0xFF),
+                             (uint8_t )((value >> 24) & 0xFF)});
+    }
+}

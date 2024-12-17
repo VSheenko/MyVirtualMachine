@@ -41,6 +41,9 @@ private:
 
     static bool isDualAddressing(uint8_t addrMode);
     uint32_t VectorToUint32(std::vector<uint8_t> vec);
+
+    uint32_t GetValueByOperand(uint8_t addrMode, uint32_t operand);
+    void     SetValueByOperand(uint8_t addrMode, uint32_t operand, uint32_t value);
 public:
     explicit Processor(const std::shared_ptr<Memory>& memory);
     ~Processor() = default;
