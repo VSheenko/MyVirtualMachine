@@ -4,8 +4,10 @@
 #include <cstdint>
 #include <stack>
 #include <unordered_map>
+#include <functional>
+#include <memory>
 #include "../CommandStruct.h"
-
+#include "Memory/Memory.h"
 
 
 class Processor {
@@ -15,28 +17,36 @@ private:
     uint32_t R[8] = {0};
     void resetRegs();
 
+    std::shared_ptr<Memory> memory;
     std::stack<uint32_t> stack;
-    std::unordered_map<std::string, uint8_t> opcodeMap;
 
+    std::unordered_map<uint8_t, std::function<void(uint8_t, uint32_t, uint32_t)>> cmdFunMap;
 
-    void mov(uint32_t& dst, uint32_t src);
-    void push(uint32_t src);
-    void pop(uint32_t& dst);
-    void xchg(uint32_t& dst, uint32_t& src);
-    void add(uint32_t& dst, uint32_t src);
-    void sub(uint32_t& dst, uint32_t src);
-    void inc(uint32_t& dst);
-    void dec(uint32_t& dst);
-    void mul(uint32_t& dst, uint32_t src);
-    void div(uint32_t& dst, uint32_t src);
-    void neg(uint32_t& dst);
+    void mov    (uint8_t addrMode, uint32_t op1, uint32_t op2);
+    void push   (uint8_t addrMode, uint32_t op1, uint32_t op2);
+    void pop    (uint8_t addrMode, uint32_t op1, uint32_t op2);
+    void xchg   (uint8_t addrMode, uint32_t op1, uint32_t op2);
+    void add    (uint8_t addrMode, uint32_t op1, uint32_t op2);
+    void sub    (uint8_t addrMode, uint32_t op1, uint32_t op2);
+    void inc    (uint8_t addrMode, uint32_t op1, uint32_t op2);
+    void dec    (uint8_t addrMode, uint32_t op1, uint32_t op2);
+    void mul    (uint8_t addrMode, uint32_t op1, uint32_t op2);
+    void div    (uint8_t addrMode, uint32_t op1, uint32_t op2);
+    void neg    (uint8_t addrMode, uint32_t op1, uint32_t op2);
+    void abs    (uint8_t addrMode, uint32_t op1, uint32_t op2);
+    void and_op (uint8_t addrMode, uint32_t op1, uint32_t op2);
+    void or_op  (uint8_t addrMode, uint32_t op1, uint32_t op2);
+    void xor_op (uint8_t addrMode, uint32_t op1, uint32_t op2);
+    void not_op (uint8_t addrMode, uint32_t op1, uint32_t op2);
+
+    static bool isDualAddressing(uint8_t addrMode);
+    uint32_t VectorToUint32(std::vector<uint8_t> vec);
 public:
-    Processor();
+    explicit Processor(const std::shared_ptr<Memory>& memory);
     ~Processor() = default;
 
+    void GetRegsState(std::vector<std::pair<std::string, uint32_t>> &regs);
     void execute(std::vector<uint8_t> code);
-    void execute();
-
 };
 
 

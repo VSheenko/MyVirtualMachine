@@ -3,8 +3,7 @@
 
 
 int main() {
-    Machine machine;
-    AsmInterpreter asmInterpreter(machine);
+    AsmInterpreter asmInterpreter(std::make_shared<Machine>(4096));
 
     try {
         asmInterpreter.interpret("test");

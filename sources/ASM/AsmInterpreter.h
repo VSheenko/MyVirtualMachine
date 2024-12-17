@@ -10,14 +10,14 @@
 
 class AsmInterpreter {
 private:
-    Machine machine;
+    std::shared_ptr<Machine> machine;
 
     void executeCommand(CommandStruct& command);
     static uint8_t GetAddrMode(const std::string& operand);
     static uint32_t GetOperandValue(const std::string& operand);
     static void ParseCommand(const std::string& command, CommandStruct& commandStruct);
 public:
-    explicit AsmInterpreter(Machine& machine);
+    explicit AsmInterpreter(std::shared_ptr<Machine> machine);
     void interpret(const std::filesystem::path& asmFilePath);
 
 };

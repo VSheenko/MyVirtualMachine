@@ -4,8 +4,8 @@
 #include "AsmInterpreter.h"
 
 
-AsmInterpreter::AsmInterpreter(Machine &machine) {
-    this->machine = machine;
+AsmInterpreter::AsmInterpreter(std::shared_ptr<Machine> machine) {
+    this->machine = std::move(machine);
 }
 
 void AsmInterpreter::interpret(const std::filesystem::path& asmFilePath) {
@@ -21,9 +21,13 @@ void AsmInterpreter::interpret(const std::filesystem::path& asmFilePath) {
     std::string line;
     CommandStruct command;
     while (std::getline(file, line)) {
+        if (line.empty()) continue;
         ParseCommand(line, command);
         executeCommand(command);
     }
+
+    file.close();
+    machine->GetState(std::cout);
 }
 
 void AsmInterpreter::ParseCommand(const std::string& command, CommandStruct& commandStruct) {
@@ -47,7 +51,7 @@ void AsmInterpreter::ParseCommand(const std::string& command, CommandStruct& com
 
         operands.push_back(operandsStr.substr(start));
     } else {
-        throw std::runtime_error("Invalid command format");
+        throw std::runtime_error("AsmInterpreter::ParseCommand-> Invalid command format: " + command);
     }
 
     if (operands.size() == 2) {
@@ -68,18 +72,18 @@ void AsmInterpreter::ParseCommand(const std::string& command, CommandStruct& com
         return;
     }
 
-    throw std::runtime_error("Invalid operands count");
+    throw std::runtime_error("AsmInterpreter::ParseCommand-> Invalid operands count");
 }
 
 void AsmInterpreter::executeCommand(CommandStruct &command) {
-    std::cout << "Executing command" << std::endl;
     std::cout << CommandStruct::GetCommandName(command.opcode) << " | " << std::bitset<8>(command.opcode) << " " << std::bitset<8>(command.addrMode) << " "
     << std::bitset<32>(command.operand1) << " " << std::bitset<32>(command.operand2) << std::endl;
+    machine->execute(command.GetBinFormat());
 }
 
 uint8_t AsmInterpreter::GetAddrMode(const std::string &operand) {
     std::regex addrRegex(R"(^\[(0x[0-9A-Fa-f]+|\d+)\]$)");
-    std::regex regRegex(R"(^R[0-7]$)");
+    std::regex regRegex(R"(^(R[0-7]|ACC)$)");
     std::regex regAddrRegex(R"(^\[(R[0-7]|ACC)\]$)");
     std::regex numRegex(R"(^(-?\d+|0x[0-9A-Fa-f]+)$)");
 
