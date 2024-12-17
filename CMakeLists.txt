@@ -14,6 +14,8 @@ add_executable(MyVirtualMachine main.cpp
         sources/Machine/Machine.h
         sources/CommandStruct.cpp
         sources/CommandStruct.h
+        sources/Logger/Logger.cpp
+        sources/Logger/Logger.h
 )
 
 target_include_directories(MyVirtualMachine PRIVATE

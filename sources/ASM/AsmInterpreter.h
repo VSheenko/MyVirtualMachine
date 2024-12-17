@@ -7,17 +7,20 @@
 #include <unordered_map>
 #include "Machine.h"
 #include "../CommandStruct.h"
+#include "../Logger/Logger.h"
 
 class AsmInterpreter {
 private:
     std::shared_ptr<Machine> machine;
+    std::shared_ptr<Logger> logger;
 
     void executeCommand(CommandStruct& command);
     static uint8_t GetAddrMode(const std::string& operand);
     static uint32_t GetOperandValue(const std::string& operand);
     static void ParseCommand(const std::string& command, CommandStruct& commandStruct);
+    void LogCommand(const CommandStruct& command);
 public:
-    explicit AsmInterpreter(std::shared_ptr<Machine> machine);
+    explicit AsmInterpreter(std::shared_ptr<Machine> machine, std::shared_ptr<Logger> logger);
     void interpret(const std::filesystem::path& asmFilePath);
 
 };

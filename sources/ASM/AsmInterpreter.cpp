@@ -5,8 +5,9 @@
 #include "AsmInterpreter.h"
 
 
-AsmInterpreter::AsmInterpreter(std::shared_ptr<Machine> machine) {
+AsmInterpreter::AsmInterpreter(std::shared_ptr<Machine> machine, std::shared_ptr<Logger> logger) {
     this->machine = std::move(machine);
+    this->logger = std::move(logger);
 }
 
 void AsmInterpreter::interpret(const std::filesystem::path& asmFilePath) {
@@ -24,6 +25,7 @@ void AsmInterpreter::interpret(const std::filesystem::path& asmFilePath) {
     while (std::getline(file, line)) {
         if (line.empty()) continue;
         ParseCommand(line, command);
+        LogCommand(command);
         executeCommand(command);
     }
 
@@ -80,8 +82,6 @@ void AsmInterpreter::ParseCommand(const std::string& command, CommandStruct& com
 }
 
 void AsmInterpreter::executeCommand(CommandStruct &command) {
-    std::cout << CommandStruct::GetCommandName(command.opcode) << " | " << std::bitset<8>(command.opcode) << " " << std::bitset<8>(command.addrMode) << " "
-    << std::bitset<32>(command.operand1) << " " << std::bitset<32>(command.operand2) << std::endl;
     machine->execute(command.GetBinFormat());
 }
 
@@ -93,8 +93,8 @@ uint8_t AsmInterpreter::GetAddrMode(const std::string &operand) {
 
 
     std::string cleaned = operand;
-    cleaned.erase(0, cleaned.find_first_not_of(" \t")); // Убираем пробелы в начале
-    cleaned.erase(cleaned.find_last_not_of(" \t") + 1); // Убираем пробелы в конце
+    cleaned.erase(0, cleaned.find_first_not_of(" \t"));
+    cleaned.erase(cleaned.find_last_not_of(" \t") + 1);
 
     if (std::regex_match(cleaned, addrRegex)) {
         return 2;
@@ -131,5 +131,28 @@ uint32_t AsmInterpreter::GetOperandValue(const std::string &operand) {
     } else {
         return std::stoul(cleaned);
     }
+}
+
+void AsmInterpreter::LogCommand(const CommandStruct &command) {
+    char separator = ',';
+    std::string logMessage = CommandStruct::GetCommandName(command.opcode) + separator;
+    int32_t value1 = (command.operand1 & 0x80000000) != 0 ? -1 * (int32_t) ((~command.operand1 + 1) & 0x7FFFFFFF) : command.operand1;
+    int32_t value2 = (command.operand2 & 0x80000000) != 0 ? -1 * (int32_t) ((~command.operand2 + 1) & 0x7FFFFFFF) : command.operand2;
+
+    logMessage += std::to_string(value1) + separator;
+    logMessage += std::to_string(value2);
+
+    logger->log(logMessage);
+
+    std::vector<uint8_t> binFormat = command.GetBinFormat();
+    std::string binStr;
+    for (int i = 0; i < binFormat.size(); i++) {
+        binStr += std::bitset<8>(binFormat[i]).to_string();
+        if (i != binFormat.size() - 1) {
+            binStr += separator;
+        }
+    }
+
+    logger->toResFile(binStr);
 }
 
