@@ -4,9 +4,7 @@
 #include "Memory.h"
 
 Memory::Memory(uint16_t size) {
-    std::cout << "Memory size: " << size << std::endl;
     memory = std::vector<uint8_t>(size);
-    std::cout << "Memory created " << memory.size() << std::endl;
     reset();
 }
 
@@ -31,7 +29,7 @@ void Memory::write(uint32_t address, const std::vector<uint8_t>& data) {
         throw std::out_of_range("Memory out of bounds");
     }
 
-    for (int i = 0; i < data.size() - 1; i++) {
+    for (int i = 1; i < data.size() - 1; i++) {
         if (address - i < 0)
             break;
         if (modifiedAddresses.find(address - i) != modifiedAddresses.end())

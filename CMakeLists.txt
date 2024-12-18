@@ -3,6 +3,8 @@ project(MyVirtualMachine)
 
 set(CMAKE_CXX_STANDARD 23)
 
+set(CMAKE_EXE_LINKER_FLAGS "-static")
+
 add_executable(MyVirtualMachine main.cpp
         sources/Machine/Memory/Memory.cpp
         sources/Machine/Memory/Memory.h
